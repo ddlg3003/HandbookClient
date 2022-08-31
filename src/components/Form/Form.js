@@ -7,7 +7,6 @@ import { createPost, updatePost } from '../../actions/posts';
 
 const Form = ({ currentId, setCurrentId }) => {
     const [postData, setPostData] = useState({
-        creator: '',
         title: '',
         message: '',
         tags: '',
@@ -16,6 +15,7 @@ const Form = ({ currentId, setCurrentId }) => {
     const post = useSelector((state) => currentId ? state.posts.find((p) => p._id === currentId) : null);
     const classes = useStyles();
     const dispatch = useDispatch();
+    const user = JSON.parse(localStorage.getItem('profile'));
 
     useEffect(() => {
         if(post) setPostData(post);
@@ -25,10 +25,10 @@ const Form = ({ currentId, setCurrentId }) => {
         e.preventDefault();
         console.log(currentId);
         if(currentId) {
-            dispatch(updatePost(currentId, postData));
+            dispatch(updatePost(currentId, { ...postData, name: user?.result?.name }));
         }
         else {
-            dispatch(createPost(postData));
+            dispatch(createPost({ ...postData, name: user?.result?.name }));
         }
         clear();
     }
@@ -36,7 +36,6 @@ const Form = ({ currentId, setCurrentId }) => {
     const clear = () => {
         setCurrentId(null);
         setPostData({
-            creator: '',
             title: '',
             message: '',
             tags: '',
@@ -44,25 +43,26 @@ const Form = ({ currentId, setCurrentId }) => {
         });
     };
 
+    if(!user?.result?.name) {
+        return (
+            <Paper className={classes.paper}>
+                <Typography variant="h6" align="center">
+                    Login to post your favorite picture and share it to others.
+                </Typography>
+            </Paper>
+        )
+    }
     return (
         <Paper className={classes.paper}>
             <form autoComplete="off" noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit}>
                 <Typography variant="h6">{currentId ? 'Edit your post' : 'Post something'}</Typography>
-                <TextField 
-                    name="creator" 
-                    variant="outlined" 
-                    label="Creator" 
-                    fullWidth 
-                    value={postData.creator}
-                    // Spread operator to enumerate the obj data and change only the last one
-                    onChange={(e) => setPostData({ ...postData, creator: e.target.value })}
-                />
                 <TextField 
                     name="title" 
                     variant="outlined" 
                     label="Title" 
                     fullWidth 
                     value={postData.title}
+                    // Spread operator to enumerate the obj data and change only the last one
                     onChange={(e) => setPostData({ ...postData, title: e.target.value })}
                 />
                 <TextField 
@@ -77,7 +77,8 @@ const Form = ({ currentId, setCurrentId }) => {
                     name="tags" 
                     variant="outlined" 
                     label="Tags" 
-                    fullWidth 
+                    fullWidth
+                    placeholder="Tags (use comma separated)" 
                     value={postData.tags}
                     onChange={(e) => setPostData({ ...postData, tags: e.target.value.split(",") })}
                 /> 

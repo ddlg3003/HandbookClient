@@ -5,24 +5,41 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { useGoogleLogin } from '@react-oauth/google';
 import Input from './Input';
 import Icon from './icon';
-import { googleToken } from '../../api/auth';
+import { googleToken, register } from '../../api/index';
 import { useDispatch } from 'react-redux';
 import { AUTH } from '../../constants/actionTypes';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../../actions/auth';
+
+const initialFormState = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+};
 
 const Auth = () => {
     const classes = useStyles();
     const [showPassword, setShowPassword] = useState(false);
     const [isSignup, setIsSignup] = useState(false);
+    const [formData, setFormData] = useState(initialFormState);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleSubmit = () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
+        if(isSignup) {
+            await register(formData);
+            switchMode();
+        } else {
+            dispatch(login(formData, navigate));
+        }
     };
 
-    const handleChange = () => {
-         
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const switchMode = () => {
@@ -32,9 +49,8 @@ const Auth = () => {
     const googleLogin = useGoogleLogin({
         onSuccess: async ({ code }) => {
             const { data } = await googleToken(code);
-            const token = data?.id_token;
             try {
-                dispatch({ type: AUTH, data: { token } });
+                dispatch({ type: AUTH, data });
                 navigate("/");
             } catch (error) {
                 console.log(error);
@@ -51,7 +67,7 @@ const Auth = () => {
                 <Avatar className={classes.avatar}>
                     <LockOutlinedIcon />
                 </Avatar>
-                <Typography variant="h5">{ isSignup ? 'Sign Up' : 'Sign In' }</Typography>
+                <Typography variant="h5">{ isSignup ? 'Sign Up' : 'Login' }</Typography>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         {
@@ -75,7 +91,7 @@ const Auth = () => {
                         { isSignup && <Input name="confirmPassword" label="Retype Password" handleChange={handleChange} type="password" /> }
                     </Grid>
                     <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
-                        { isSignup ? 'Sign Up' : 'Sign In' }
+                        { isSignup ? 'Sign Up' : 'Login' }
                     </Button>
                     <Button 
                         className={classes.googleButton} 
@@ -84,12 +100,12 @@ const Auth = () => {
                         fullWidth
                         onClick={googleLogin}
                     >
-                        <Icon /> Sign in with Google
+                        <Icon /> Login with Google
                     </Button>
                     <Grid container justifyContent="flex-end">
                         <Grid>
                             <Button onClick={switchMode}>
-                                { isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up" }
+                                { isSignup ? 'Already have an account? Login' : "Don't have an account? Sign Up" }
                             </Button>
                         </Grid>
                     </Grid>
