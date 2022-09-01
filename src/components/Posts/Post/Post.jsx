@@ -14,6 +14,10 @@ const Post = ({ post, setCurrentId }) => {
     const dispatch = useDispatch();
     const user = JSON.parse(localStorage.getItem('profile'));
 
+    const handleDelete = () => {
+        dispatch(deletePost(post._id));
+    } 
+
     const Likes = () => {
         if(post.likes.length > 0) {
             return post.likes.find((like) => like === (user?.result?.sub || user?.result?.id))
@@ -34,7 +38,7 @@ const Post = ({ post, setCurrentId }) => {
     }
 
     return (
-        <Card className={classes.card}>
+        <Card className={classes.card} raised elevation={6}>
             <CardMedia className={classes.media} image={post.selectedFile} />
             <div className={classes.overlay}>
                 <Typography variant="h6">{post.name}</Typography>
@@ -62,7 +66,7 @@ const Post = ({ post, setCurrentId }) => {
                     <Likes />
                 </Button>
                 {(user?.result?.sub === post?.creator || user?.result?.id === post?.creator) && (
-                    <Button size="small" color="primary" onClick={() => dispatch(deletePost(post._id))}>
+                    <Button size="small" color="primary" onClick={handleDelete}>
                         <DeleteIcon fontSize="small" />
                         Delete
                     </Button>
