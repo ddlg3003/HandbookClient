@@ -4,6 +4,7 @@ import { TextField, Button, Paper, Typography } from '@material-ui/core';
 import FireBase from 'react-file-base64';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPost, updatePost } from '../../actions/posts';
+import { useNavigate } from 'react-router-dom';
 
 const Form = ({ currentId, setCurrentId }) => {
     const [postData, setPostData] = useState({
@@ -15,6 +16,7 @@ const Form = ({ currentId, setCurrentId }) => {
     const post = useSelector((state) => currentId ? state.posts.posts.find((p) => p._id === currentId) : null);
     const classes = useStyles();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('profile'));
 
     useEffect(() => {
@@ -28,7 +30,7 @@ const Form = ({ currentId, setCurrentId }) => {
             dispatch(updatePost(currentId, { ...postData, name: user?.result?.name }));
         }
         else {
-            dispatch(createPost({ ...postData, name: user?.result?.name }));
+            dispatch(createPost({ ...postData, name: user?.result?.name }, navigate));
         }
         clear();
     }
@@ -70,7 +72,7 @@ const Form = ({ currentId, setCurrentId }) => {
                     variant="outlined" 
                     label="Message" 
                     fullWidth 
-                    multiline rows={4}
+                    multiline minRows={4}
                     value={postData.message}
                     onChange={(e) => setPostData({ ...postData, message: e.target.value })}
                 />  

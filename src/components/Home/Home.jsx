@@ -73,7 +73,7 @@ const Home = () => {
                         </AppBar>
                         <Form currentId={currentId} setCurrentId={setCurrentId} />
                         <Paper elevation={2}>
-                            <Pagination page={page  } />
+                            <Pagination page={page} />
                         </Paper>
                     </Grid>
                 </Grid>
